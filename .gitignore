@@ -2,3 +2,5 @@
 .venv
 bot-env/
 *.log
+__pycache__/
+guild_config.json
