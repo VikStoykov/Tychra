@@ -70,7 +70,7 @@ class Tychra(commands.Bot):
             logger.error(f"Error updating nickname in {guild.name}: {e}")
             return False
 
-    async def update_status(self, status_text, activity_type = "custom"):
+    async def update_status(self, status_text, emotion=None, activity_type="custom"):
         try:
             # Use custom status by default (like user's status message)
             if activity_type == "custom":
@@ -85,9 +85,20 @@ class Tychra(commands.Bot):
             else:  # playing
                 activity = discord.Game(name=status_text)
 
+            # Determine discord.Status based on emotion (if provided)
+            if emotion:
+                if emotion in ['Extreme Fear', 'Fear']:
+                    status = discord.Status.do_not_disturb
+                elif emotion in ['Greed', 'Extreme Greed']:
+                    status = discord.Status.online
+                else:
+                    status = discord.Status.idle
+            else:
+                status = discord.Status.online
+
             # Update presence
-            await self.change_presence(activity=activity)
-            logger.info(f"Updated status to: {status_text}")
+            await self.change_presence(status=status, activity=activity)
+            logger.info(f"Updated status to: {status_text} (presence: {status.name})")
             return True
 
         except Exception as e:
