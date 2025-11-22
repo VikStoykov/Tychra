@@ -8,6 +8,7 @@ from src.client import create_bot
 from src.config_manager import ConfigManager
 from src.commands import setup_commands
 from src.updater import Updater
+from src.scheduler import UpdateScheduler
 
 load_dotenv()
 
@@ -24,6 +25,9 @@ async def run_bot(logger):
     config_manager = ConfigManager()
     bot.config_manager = config_manager
 
+    updater = Updater(bot, config_manager)
+    scheduler = UpdateScheduler(bot, config_manager, updater)
+
     @bot.event
     async def on_ready():
         await setup_commands(bot, config_manager)
@@ -31,11 +35,13 @@ async def run_bot(logger):
 
         logger.info("Running initial update for all guilds...")
         try:
-            updater = Updater(bot, config_manager)
+            #updater = Updater(bot, config_manager)
             results = await updater.update_all_guilds()
             successful = sum(1 for success in results.values() if success)
             total = len(results)
             logger.info(f"Initial update complete: {successful}/{total} guilds updated successfully")
+
+            scheduler.start()
         except Exception as e:
             logger.error(f"Error during initial update: {e}")
 
@@ -47,6 +53,7 @@ async def run_bot(logger):
         logger.error(f"⛔ Error running Tychra: {e}")
         sys.exit(1)
     finally:
+        scheduler.stop()
         await bot.close()
 
 
