@@ -5,7 +5,9 @@
 ![Discord](https://img.shields.io/badge/discord.py-2.6.4-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
-![Tychra](./images/logo.png "Tychra Logo")
+<div align="center">
+  <img src="./images/logo_name.png" alt="Tychra Logo" width="300" height="300">
+</div>
 
 **A Discord bot that tracks market sentiment indicators and displays them in real-time**
 
