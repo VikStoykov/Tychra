@@ -1,5 +1,5 @@
 __version__ = "1.0.0"
-__release_date__ = "2025-11-11"
+__release_date__ = "2025-11-23"
 __author__ = "VikStoykov"
 __license__ = "MIT"
 __description__ = "Tychra Discord Bot - Track market sentiment indicators"
@@ -9,7 +9,7 @@ VERSION_INFO = {
     "minor": 0,
     "patch": 0,
     "release": "stable",
-    "build": "20251111"
+    "build": "20251123"
 }
 
 
