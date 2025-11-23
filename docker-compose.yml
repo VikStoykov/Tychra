@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  tychra:
+    image: vikstoykov/tychra:latest
+    container_name: tychra-bot
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./guild_config.json:/app/guild_config.json
+      - ./discord.log:/app/discord.log
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.1'
+          memory: 128M
