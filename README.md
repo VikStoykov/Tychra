@@ -158,7 +158,7 @@ All commands require "Manage Server" permission:
    - Use Slash Commands
    <img src="./images/discord_bot_permissions.png" alt="Bot permissions" width="450" height="250">
 6. Go to "OAuth2" → "URL Generator"
-<img src="./images/oauth2_url_gen.png" alt="oAuth2" width="450" height="250">
+   - <img src="./images/oauth2_url_gen.png" alt="oAuth2" width="450" height="250">
 7. Select scopes: `bot` and `applications.commands`
 8. Select permissions: `Change Nickname`, `Send Messages`
 9. Use the generated URL to invite the bot to your server ("OAuth2" → "URL Generator" → "Generated URL")
