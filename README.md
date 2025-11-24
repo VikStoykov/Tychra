@@ -22,6 +22,8 @@
 - 🐳 **Docker Ready** - Easy deployment with Docker and docker-compose
 - 🆓 **Free & Open Source** - No API keys required (uses public data)
 
+<img src="./images/example1.png" alt="How it looks like" width="450" height="">
+
 ## Quick Start
 
 ### Prerequisites
@@ -31,6 +33,9 @@
 - Docker (optional, for containerized deployment)
 
 ### Installation
+
+[![Download Latest Release](https://img.shields.io/badge/📥_Download-Latest_Release-success?style=for-the-badge)](https://github.com/VikStoykov/Tychra/releases/latest)
+
 
 #### Option 1: Local Installation
 
@@ -117,6 +122,8 @@ All commands require "Manage Server" permission:
 - `/forceupdate` - Trigger an immediate update
 - `/about` - Show bot information
 
+<img src="./images/menu_options.png" alt="Menu options" width="500" height="300">
+
 ### Template Placeholders
 
 | Placeholder | Description | Example |
@@ -149,10 +156,12 @@ All commands require "Manage Server" permission:
    - Change Nickname
    - Send Messages
    - Use Slash Commands
+   <img src="./images/discord_bot_permissions.png" alt="Bot permissions" width="450" height="250">
 6. Go to "OAuth2" → "URL Generator"
+<img src="./images/oauth2_url_gen.png" alt="oAuth2" width="450" height="250">
 7. Select scopes: `bot` and `applications.commands`
 8. Select permissions: `Change Nickname`, `Send Messages`
-9. Use the generated URL to invite the bot to your server
+9. Use the generated URL to invite the bot to your server ("OAuth2" → "URL Generator" → "Generated URL")
 
 ## Data Sources
 

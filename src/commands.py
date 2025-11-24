@@ -134,8 +134,8 @@ class CommandsCog(commands.Cog):
         embed.add_field(
             name="📊 Data Sources",
             value=(
-                "• Stock Market F&G Index (CNN)\n"
-                "• Crypto Market F&G Index (Alternative.me)"
+                "• Stock Market F&G Index (CNN)"
+                #"• Crypto Market F&G Index (Alternative.me)"
             ),
             inline=False
         )
