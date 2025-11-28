@@ -12,16 +12,18 @@ class Updater:
         self.provider_cache = {}
 
     async def fetch_all_providers(self):
-        from providers.market import MarketProvider
+        from providers import MarketProvider, CryptoProvider
 
-        try:
-            provider = MarketProvider()
-            data = await provider.fetch()
-            self.provider_cache['m'] = data
-            logger.info(f"✓ {'m'}: {data}")
-        except Exception as e:
-            logger.error(f"✗ Failed to fetch {'m'}: {e}")
-            self.provider_cache['m'] = {}
+        providers = { 'm': MarketProvider(), 'c': CryptoProvider() }
+        
+        for name, provider in providers.items():
+            try:
+                data = await provider.fetch()
+                self.provider_cache[name] = data
+                logger.info(f"✓ {name}: {data}")
+            except Exception as e:
+                logger.error(f"✗ Failed to fetch {name}: {e}")
+                self.provider_cache[name] = {}
 
     def render_template(self, template):
         result = template

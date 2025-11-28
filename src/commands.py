@@ -90,6 +90,11 @@ class CommandsCog(commands.Cog):
                 "`{m.emotion}` - Emotion label\n"
                 "`{m.emoji}` - Emotion emoji\n"
                 "`{m.trend}` - Trend indicator\n\n"
+                "**Crypto Market (c):**\n"
+                "`{c.index}` - Index value (0-100)\n"
+                "`{c.emotion}` - Emotion label\n"
+                "`{c.emoji}` - Emotion emoji\n"
+                "`{c.trend}` - Trend indicator\n"
             ),
             inline=False
         )
@@ -135,7 +140,7 @@ class CommandsCog(commands.Cog):
             name="📊 Data Sources",
             value=(
                 "• Stock Market F&G Index (CNN)"
-                #"• Crypto Market F&G Index (Alternative.me)"
+                "• Crypto Market F&G Index (Alternative.me)"
             ),
             inline=False
         )

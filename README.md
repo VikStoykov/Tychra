@@ -16,9 +16,11 @@
 ## Features
 
 - 📊 **Live Market Data** - Fetches CNN Fear & Greed Index automatically
+- 💰 **Crypto Sentiment** - Tracks Crypto Fear & Greed Index from Alternative.me
 - 🤖 **Dynamic Updates** - Changes bot nickname and status based on market sentiment
 - ⏰ **Scheduled Updates** - Configurable automatic updates with timezone support
 - 🎨 **Customizable Templates** - Create your own display format per server
+- 📈 **Multiple Providers** - Combine stock and crypto data in one display
 - 🐳 **Docker Ready** - Easy deployment with Docker and docker-compose
 - 🆓 **Free & Open Source** - No API keys required (uses public data)
 
@@ -126,24 +128,40 @@ All commands require "Manage Server" permission:
 
 ### Template Placeholders
 
+**Stock Market (prefix: `m`)**
 | Placeholder | Description | Example |
 |------------|-------------|---------|
-| `{m.index}` | Market index (0-100) | `42` |
-| `{m.emotion}` | Market emotion | `Fear` |
-| `{m.emoji}` | Market emoji | `😨` |
-| `{m.trend}` | Market trend | `↘️ falling` |
+| `{m.index}` | Stock market index (0-100) | `42` |
+| `{m.emotion}` | Stock market emotion | `Fear` |
+| `{m.emoji}` | Stock market emoji | `😨` |
+| `{m.trend}` | Stock market trend | `↘️ falling` |
+
+**Crypto Market (prefix: `c`)**
+| Placeholder | Description | Example |
+|------------|-------------|---------|
+| `{c.index}` | Crypto market index (0-100) | `67` |
+| `{c.emotion}` | Crypto market emotion | `Greed` |
+| `{c.emoji}` | Crypto market emoji | `😊` |
+| `{c.trend}` | Crypto market trend | `↗️ rising` |
 
 ### Template Examples
 
 ```bash
-# Simple index display
+# Stock market only
 /setnickname F/G: {m.index}
-
-# With emoji
-/setnickname {m.emoji} {m.index}
-
-# Full status
 /setstatus {m.emotion} {m.emoji} - {m.trend}
+
+# Crypto market only
+/setnickname Crypto: {c.index}
+/setstatus {c.emotion} {c.emoji}
+
+# Combine both markets
+/setnickname S:{m.index} C:{c.index}
+/setstatus 📈{m.emoji}{m.index} | 💰{c.emoji}{c.index}
+
+# Full display with trends
+/setnickname {m.emoji}{m.index} {c.emoji}{c.index}
+/setstatus Market:{m.trend} Crypto:{c.trend}
 ```
 
 ## Discord Bot Setup
@@ -166,6 +184,7 @@ All commands require "Manage Server" permission:
 ## Data Sources
 
 - **Stock Market**: [CNN Fear & Greed Index](https://money.cnn.com/data/fear-and-greed/)
+- **Crypto Market**: [Alternative.me Crypto Fear & Greed Index](https://alternative.me/crypto/fear-and-greed-index/)
 
 ## License
 
