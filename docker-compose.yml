@@ -7,9 +7,6 @@ services:
     restart: unless-stopped
     env_file:
       - .env
-    volumes:
-      - ./guild_config.json:/app/guild_config.json
-      - ./discord.log:/app/discord.log
     deploy:
       resources:
         limits:

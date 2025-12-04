@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tychra"
+version = "1.0.0"
+description = "Discord bot that tracks market sentiment indicators"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+authors = [
+    {name = "VikStoykov", email = "viktor.stykov95@gmail.com"}
+]
+keywords = ["discord", "bot", "market", "sentiment", "fear-greed-index"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+]
+
+dependencies = [
+    "discord.py>=2.6.4",
+    "aiohttp>=3.13.2",
+    "python-dotenv>=1.2.1",
+]
+
+[project.urls]
+Homepage = "https://github.com/VikStoykov/Tychra"
+Repository = "https://github.com/VikStoykov/Tychra"
+Issues = "https://github.com/VikStoykov/Tychra/issues"
+
+[project.scripts]
+tychra = "main:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*", "providers*"]
+exclude = ["tests*", "*.log", "*.json", "bot-env*", ".git*"]
+
+[tool.setuptools]
+py-modules = ["main"]
