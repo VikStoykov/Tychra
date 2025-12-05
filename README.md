@@ -93,9 +93,48 @@ DISCORD_TOKEN=your_discord_bot_token_here
 # Optional: Timezone for scheduled updates (default: UTC)
 TIMEZONE=UTC
 
-# Optional: Scheduled update times (comma-separated, 24-hour format)
-UPDATE_TIMES=09:00,18:00
+# Optional: Cron schedule for automatic updates (standard cron format)
+# Format: "MINUTE HOUR DAY MONTH DAYOFWEEK"
+SCHEDULE_CRON=0 9,18 * * *
 ```
+
+### Schedule Examples
+
+```env
+# Every 5 minutes
+SCHEDULE_CRON=*/5 * * * *
+
+# Every day at 8:00 AM
+SCHEDULE_CRON=0 8 * * *
+
+# Every day at 1:15 PM
+SCHEDULE_CRON=15 13 * * *
+
+# Every 6 hours
+SCHEDULE_CRON=0 */6 * * *
+
+# Weekdays at 9:30 AM (Monday-Friday)
+SCHEDULE_CRON=30 9 * * 1-5
+
+# Twice daily at 9 AM and 6 PM
+SCHEDULE_CRON=0 9,18 * * *
+
+# First day of every month at midnight
+SCHEDULE_CRON=0 0 1 * *
+```
+
+**Cron Format:** `MINUTE HOUR DAY MONTH DAYOFWEEK`
+- MINUTE: 0-59
+- HOUR: 0-23
+- DAY: 1-31
+- MONTH: 1-12
+- DAYOFWEEK: 0-7 (0 and 7 are Sunday)
+
+**Special characters:**
+- `*` - Any value
+- `,` - Value list separator (1,3,5)
+- `-` - Range of values (1-5)
+- `/` - Step values (*/5 = every 5)
 
 ### Timezone Examples
 

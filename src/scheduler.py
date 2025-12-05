@@ -1,9 +1,9 @@
 import logging
 import os
-import datetime
+from datetime import datetime
 from zoneinfo import ZoneInfo
+from croniter import croniter
 from discord.ext import tasks
-from typing import Optional, List
 
 logger = logging.getLogger(__name__)
 
@@ -18,61 +18,62 @@ class UpdateScheduler:
         self.bot = bot
         self.config_manager = config_manager
         self.updater = updater
-        self.update_times: Optional[List[datetime.time]] = None
-        self._parse_update_times()
+        self.cron_expression = None
+        self.timezone = None
+        self._parse_schedule()
 
-    def _parse_update_times(self):
+    def _parse_schedule(self):
         """
-        Parse UPDATE_TIMES and TIMEZONE from environment variables.
-        Format: "HH:MM,HH:MM,HH:MM" (e.g., "09:00,18:00,23:30")
-        Timezone: IANA timezone name (e.g., "America/New_York", "Europe/London")
+        Parse SCHEDULE_CRON and TIMEZONE from environment variables.
+
+        Cron format: "MINUTE HOUR DAY MONTH DAYOFWEEK"
+        Examples:
+            "*/5 * * * *"    - Every 5 minutes
+            "0 8 * * *"      - Every day at 8:00 AM
+            "15 13 * * *"    - Every day at 13:15 (1:15 PM)
+            "0 */6 * * *"    - Every 6 hours
+            "30 9 * * 1-5"   - Weekdays at 9:30 AM
+            "0 0 1 * *"      - First day of every month at midnight
+
+        Timezone: IANA timezone name (e.g., "America/New_York", "Europe/London", "UTC")
         """
-        update_times_str = os.getenv("UPDATE_TIMES", "").strip()
+        cron_str = os.getenv("SCHEDULE_CRON", "").strip()
         timezone_str = os.getenv("TIMEZONE", "UTC").strip()
 
-        if not update_times_str:
-            logger.info("UPDATE_TIMES not set, automatic updates disabled")
+        if not cron_str:
+            logger.info("SCHEDULE_CRON not set, automatic updates disabled")
             return
 
         try:
-            tz = ZoneInfo(timezone_str)
+            self.timezone = ZoneInfo(timezone_str)
             logger.info(f"Using timezone: {timezone_str}")
         except Exception as e:
             logger.warning(f"Invalid timezone '{timezone_str}', falling back to UTC: {e}")
-            tz = ZoneInfo("UTC")
+            self.timezone = ZoneInfo("UTC")
             timezone_str = "UTC"
 
-        times = []
+        try:
+            # Validate cron expression
+            base_time = datetime.now(self.timezone)
+            cron = croniter(cron_str, base_time)
+            next_run = cron.get_next(datetime)
 
-        for time_str in update_times_str.split(','):
-            time_str = time_str.strip()
-            try:
-                hour, minute = map(int, time_str.split(':'))
-                if 0 <= hour <= 23 and 0 <= minute <= 59:
-                    time_obj = datetime.time(hour=hour, minute=minute, tzinfo=tz)
-                    times.append(time_obj)
-                    logger.info(f"Scheduled update at {time_str} {timezone_str}")
-                else:
-                    logger.warning(f"Invalid time value: {time_str} (must be HH:MM with hour 0-23, minute 0-59)")
-            except ValueError:
-                logger.warning(f"Invalid time format: {time_str} (expected HH:MM)")
+            self.cron_expression = cron_str
+            logger.info(f"Cron schedule set: '{cron_str}' (timezone: {timezone_str})")
+            logger.info(f"Next scheduled run: {next_run.strftime('%Y-%m-%d %H:%M:%S %Z')}")
 
-        if times:
-            self.update_times = times
-        else:
-            logger.warning("No valid update times found in UPDATE_TIMES")
+        except Exception as e:
+            logger.error(f"Invalid cron expression '{cron_str}': {e}")
 
     def start(self):
         """
-        Start the scheduled update task if times are configured
+        Start the scheduled update task if cron expression is configured
         """
-        if self.update_times:
-            # Dynamically change the loop interval to match configured times
-            self.scheduled_update.change_interval(time=self.update_times)
+        if self.cron_expression:
             self.scheduled_update.start()
-            logger.info(f"Scheduled updates enabled for {len(self.update_times)} time(s) per day")
+            logger.info(f"Scheduled updates enabled with cron: {self.cron_expression}")
         else:
-            logger.info("Scheduled updates not started (no times configured)")
+            logger.info("Scheduled updates not started (no schedule configured)")
 
     def stop(self):
         """
@@ -85,17 +86,34 @@ class UpdateScheduler:
     @tasks.loop()
     async def scheduled_update(self):
         """
-        Background task that runs at scheduled times.
-        Updates all guilds with latest market data.
+        Background task that runs based on cron schedule.
         """
+        if not self.cron_expression:
+            return
+
         try:
+            now = datetime.now(self.timezone)
+            
             logger.info("⏰ Running scheduled update...")
             results = await self.updater.update_all_guilds()
             successful = sum(1 for success in results.values() if success)
             total = len(results)
             logger.info(f"Scheduled update complete: {successful}/{total} guilds updated")
+
+            # Calculate seconds until next run
+            cron = croniter(self.cron_expression, now)
+            next_run = cron.get_next(datetime)
+            seconds_until_next = (next_run - now).total_seconds()
+
+            logger.info(f"Next scheduled run: {next_run.strftime('%Y-%m-%d %H:%M:%S %Z')} (in {seconds_until_next:.0f}s)")
+
+            # Change interval for next iteration
+            self.scheduled_update.change_interval(seconds=max(1, seconds_until_next))
+
         except Exception as e:
             logger.error(f"Error in scheduled update: {e}", exc_info=True)
+            # Fallback to 60 seconds on error
+            self.scheduled_update.change_interval(seconds=60)
 
     @scheduled_update.before_loop
     async def before_scheduled_update(self):
