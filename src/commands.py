@@ -10,6 +10,23 @@ class CommandsCog(commands.Cog):
         self.bot = bot
         self.config_manager = config_manager
 
+    async def _perform_update(self, guild_id):
+        from src.updater import Updater
+        updater = Updater(self.bot, self.config_manager)
+        return await updater.update_guild(guild_id)
+
+    async def _update_and_respond(self, interaction, success_msg, error_msg=None):
+        try:
+            await self._perform_update(interaction.guild.id)
+            await interaction.followup.send(
+                f"{success_msg}\n🔄 Updated successfully!",
+                ephemeral=True
+            )
+        except Exception as e:
+            logger.error(f"Error during update: {e}")
+            fallback = error_msg or f"{success_msg}\n⚠️ Update will be applied on next scheduled run."
+            await interaction.followup.send(fallback, ephemeral=True)
+
     @app_commands.command(name="setnickname", description="Set the bot's nickname template")
     @app_commands.describe(template="Template for nickname (e.g., 'F/G: {m.index}')")
     async def set_nickname(self, interaction, template: str):
@@ -21,6 +38,8 @@ class CommandsCog(commands.Cog):
             )
             return
 
+        await interaction.response.defer(ephemeral=True)
+
         success = self.config_manager.set_guild_template(
             interaction.guild.id,
             "nickname",
@@ -28,13 +47,12 @@ class CommandsCog(commands.Cog):
         )
 
         if success:
-            await interaction.response.send_message(
-                f"✅ Nickname template updated to: `{template}`\n"
-                f"The nickname will be updated on the next scheduled run.",
-                ephemeral=True
+            await self._update_and_respond(
+                interaction,
+                f"✅ Nickname template updated to: `{template}`"
             )
         else:
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 "❌ Failed to update nickname template.",
                 ephemeral=True
             )
@@ -43,6 +61,8 @@ class CommandsCog(commands.Cog):
     @app_commands.describe(template="Template for status (e.g., '{m.emotion} {m.emoji}')")
     async def set_status(self, interaction, template: str):
 
+        await interaction.response.defer(ephemeral=True)
+
         success = self.config_manager.set_guild_template(
             interaction.guild.id,
             "status",
@@ -50,13 +70,12 @@ class CommandsCog(commands.Cog):
         )
 
         if success:
-            await interaction.response.send_message(
-                f"✅ Status template updated to: `{template}`\n"
-                f"The status will be updated on the next scheduled run.",
-                ephemeral=True
+            await self._update_and_respond(
+                interaction,
+                f"✅ Status template updated to: `{template}`"
             )
         else:
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 "❌ Failed to update status template.",
                 ephemeral=True
             )
@@ -107,17 +126,12 @@ class CommandsCog(commands.Cog):
         await interaction.response.defer(ephemeral=True)
 
         try:
-            # Import here to avoid circular dependency
-            from src.updater import Updater
-
-            updater = Updater(self.bot, self.config_manager)
-            success = await updater.update_guild(interaction.guild.id)
+            success = await self._perform_update(interaction.guild.id)
 
             if success:
                 await interaction.followup.send("✅ Update completed successfully!", ephemeral=True)
             else:
                 await interaction.followup.send("⚠️ Update completed with some errors. Check logs.", ephemeral=True)
-
         except Exception as e:
             logger.error(f"Error in force update: {e}")
             await interaction.followup.send(f"❌ Error during update: {str(e)}", ephemeral=True)
