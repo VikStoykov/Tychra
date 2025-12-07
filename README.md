@@ -155,12 +155,17 @@ TIMEZONE=Asia/Tokyo
 
 ## Discord Commands
 
-All commands require "Manage Server" permission:
+### Admin Commands
+These commands require **Administrator** permission:
 
 - `/setnickname <template>` - Set the bot's nickname template
 - `/setstatus <template>` - Set the bot's status template
 - `/showtemplates` - View current templates and available placeholders
 - `/forceupdate` - Trigger an immediate update
+
+### Public Commands
+Available to all users:
+
 - `/about` - Show bot information
 
 <img src="./images/menu_options.png" alt="Menu options" width="500" height="300">

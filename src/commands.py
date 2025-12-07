@@ -28,6 +28,7 @@ class CommandsCog(commands.Cog):
             await interaction.followup.send(fallback, ephemeral=True)
 
     @app_commands.command(name="setnickname", description="Set the bot's nickname template")
+    @app_commands.default_permissions(administrator=True)
     @app_commands.describe(template="Template for nickname (e.g., 'F/G: {m.index}')")
     async def set_nickname(self, interaction, template: str):
 
@@ -58,6 +59,7 @@ class CommandsCog(commands.Cog):
             )
 
     @app_commands.command(name="setstatus", description="Set the bot's status template")
+    @app_commands.default_permissions(administrator=True)
     @app_commands.describe(template="Template for status (e.g., '{m.emotion} {m.emoji}')")
     async def set_status(self, interaction, template: str):
 
@@ -81,6 +83,7 @@ class CommandsCog(commands.Cog):
             )
 
     @app_commands.command(name="showtemplates", description="Show current templates")
+    @app_commands.default_permissions(administrator=True)
     async def show_templates(self, interaction):
         config = self.config_manager.get_guild_config(interaction.guild.id)
 
@@ -121,6 +124,7 @@ class CommandsCog(commands.Cog):
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
     @app_commands.command(name="forceupdate", description="Force an immediate update")
+    @app_commands.default_permissions(administrator=True)
     async def force_update(self, interaction):
 
         await interaction.response.defer(ephemeral=True)
@@ -181,6 +185,24 @@ class CommandsCog(commands.Cog):
 
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
+    async def cog_app_command_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+        if isinstance(error, app_commands.MissingPermissions):
+            await interaction.response.send_message(
+                "❌ You need Administrator permissions to use this command.",
+                ephemeral=True
+            )
+        else:
+            logger.error(f"Command error: {error}", exc_info=error)
+            if not interaction.response.is_done():
+                await interaction.response.send_message(
+                    f"❌ An error occurred: {str(error)}",
+                    ephemeral=True
+                )
+            else:
+                await interaction.followup.send(
+                    f"❌ An error occurred: {str(error)}",
+                    ephemeral=True
+                )
 
 async def setup_commands(bot, config_manager):
     # Check if cog is already loaded (happens on reconnect)
