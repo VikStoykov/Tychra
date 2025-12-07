@@ -142,7 +142,7 @@ class CommandsCog(commands.Cog):
             from version import __version__, __release_date__
             version_str = f"v{__version__} ({__release_date__})"
         except ImportError:
-            version_str = "v1.0.0"
+            version_str = "v1.1.0"
 
         embed = discord.Embed(
             title="🌊 Tychra",
