@@ -9,6 +9,7 @@ from src.config_manager import ConfigManager
 from src.commands import setup_commands
 from src.updater import Updater
 from src.scheduler import UpdateScheduler
+from src.chart_generator import ChartGenerator
 
 load_dotenv()
 
@@ -27,10 +28,11 @@ async def run_bot(logger):
 
     updater = Updater(bot, config_manager)
     scheduler = UpdateScheduler(bot, config_manager, updater)
+    chart_generator = ChartGenerator()
 
     @bot.event
     async def on_ready():
-        await setup_commands(bot, config_manager)
+        await setup_commands(bot, config_manager, chart_generator)
         logger.info(f"🧘🏻‍♀️ Whispering to the gods of chance! Logged in as {bot.user}")
 
         logger.info("Running initial update for all guilds...")

@@ -6,9 +6,10 @@ import logging
 logger = logging.getLogger(__name__)
 
 class CommandsCog(commands.Cog):
-    def __init__(self, bot, config_manager):
+    def __init__(self, bot, config_manager, chart_generator=None):
         self.bot = bot
         self.config_manager = config_manager
+        self.chart_generator = chart_generator
 
     async def _perform_update(self, guild_id):
         from src.updater import Updater
@@ -170,6 +171,7 @@ class CommandsCog(commands.Cog):
                 "`/setstatus` - Set status template\n"
                 "`/showtemplates` - View current templates\n"
                 "`/forceupdate` - Trigger immediate update\n"
+                "`/chart` - Generate F&G Index chart\n"
                 "`/about` - Show this information"
             ),
             inline=False
@@ -184,6 +186,88 @@ class CommandsCog(commands.Cog):
         embed.set_footer(text=f"Version {version_str} • Built with discord.py")
 
         await interaction.response.send_message(embed=embed, ephemeral=True)
+
+    @app_commands.command(name="chart", description="Generate Fear & Greed Index chart")
+    @app_commands.describe(
+        days="Number of days to show (default: 10, max: 365)",
+        provider="Data source: market (stocks) or crypto (default: market)"
+    )
+    @app_commands.choices(provider=[
+        app_commands.Choice(name="Stock Market", value="market"),
+        app_commands.Choice(name="Cryptocurrency", value="crypto")
+    ])
+    async def chart(
+        self, 
+        interaction: discord.Interaction,
+        days: int = 10,
+        provider: app_commands.Choice[str] = None
+    ):
+        """Generate and display Fear & Greed Index chart."""
+
+        # Check if chart generator is available
+        if not self.chart_generator:
+            await interaction.response.send_message(
+                "❌ Chart generation is not available.",
+                ephemeral=True
+            )
+            return
+
+        # Validate days parameter
+        if days < 1:
+            await interaction.response.send_message(
+                "❌ Number of days must be at least 1.",
+                ephemeral=True
+            )
+            return
+
+        if days > 365:
+            await interaction.response.send_message(
+                "❌ Number of days cannot exceed 365.",
+                ephemeral=True
+            )
+            return
+
+        # Check if chart generation is already in progress
+        if await self.chart_generator.is_busy():
+            await interaction.response.send_message(
+                "⏳ Chart generation is already in progress. Please try again in a moment.",
+                ephemeral=True
+            )
+            return
+
+        await interaction.response.defer(ephemeral=True)
+
+        try:
+            # Determine provider
+            provider_value = provider.value if provider else "market"
+            provider_name = "Stock Market" if provider_value == "market" else "Cryptocurrency"
+            
+            logger.info(f"📊 Generating {provider_name} chart for {days} days (requested by {interaction.user})")
+            
+            # Generate chart
+            chart_url = await self.chart_generator.generate_chart(days, provider_value)
+            
+            if chart_url:
+                embed = discord.Embed(
+                    title=f"📈 {provider_name} Fear & Greed Index",
+                    description=f"Showing last {days} day{'s' if days != 1 else ''}",
+                    color=discord.Color.blue()
+                )
+                embed.set_image(url=chart_url)
+                embed.set_footer(text=f"Requested by {interaction.user.display_name}")
+                
+                await interaction.followup.send(embed=embed, ephemeral=True)
+            else:
+                await interaction.followup.send(
+                    "❌ Failed to generate chart. Please try again later.",
+                    ephemeral=True
+                )
+        except Exception as e:
+            logger.error(f"Error generating chart: {e}")
+            await interaction.followup.send(
+                f"❌ Error generating chart: {str(e)}",
+                ephemeral=True
+            )
 
     async def cog_app_command_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
         if isinstance(error, app_commands.MissingPermissions):
@@ -204,13 +288,13 @@ class CommandsCog(commands.Cog):
                     ephemeral=True
                 )
 
-async def setup_commands(bot, config_manager):
+async def setup_commands(bot, config_manager, chart_generator=None):
     # Check if cog is already loaded (happens on reconnect)
     if bot.get_cog("CommandsCog") is not None:
         logger.info("✅ Commands already loaded, skipping setup")
         return
 
-    cog = CommandsCog(bot, config_manager)
+    cog = CommandsCog(bot, config_manager, chart_generator)
     await bot.add_cog(cog)
 
     # Sync commands with Discord

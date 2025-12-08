@@ -22,6 +22,7 @@
 - 🎨 **Customizable Templates** - Create your own display format per server
 - 📈 **Multiple Providers** - Combine stock and crypto data in one display
 - 🐳 **Docker Ready** - Easy deployment with Docker and docker-compose
+- 📊 **Historical Charts** - Visualize Fear & Greed trends over time with color-coded zones
 - 🆓 **Free & Open Source** - No API keys required (uses public data)
 
 <img src="./images/example1.png" alt="How it looks like" width="450" height="">
@@ -167,6 +168,9 @@ These commands require **Administrator** permission:
 Available to all users:
 
 - `/about` - Show bot information
+- `/chart [days] [provider]` - Generate Fear & Greed Index chart
+  - `days` (optional): Number of days to display (1-365, default: 10)
+  - `provider` (optional): Choose "Stock Market" or "Cryptocurrency" (default: Stock Market)
 
 <img src="./images/menu_options.png" alt="Menu options" width="500" height="300">
 
@@ -207,6 +211,46 @@ Available to all users:
 /setnickname {m.emoji}{m.index} {c.emoji}{c.index}
 /setstatus Market:{m.trend} Crypto:{c.trend}
 ```
+
+## Chart Generation
+
+Generate beautiful historical charts to visualize Fear & Greed trends over time.
+
+<img src="./images/stock_market_chart_example.png" alt="Chart example" width="500" height="300">
+
+### Usage
+
+```bash
+# Default: Last 10 days, stock market
+/chart
+
+# Custom time range
+/chart days:30
+
+# Crypto market chart
+/chart provider:Cryptocurrency
+
+# Custom range + crypto
+/chart days:90 provider:Cryptocurrency
+```
+
+### Chart Features
+
+- **Line chart**
+- **Color-coded zones** for intuitive sentiment reading:
+  - 🔴 **0-25**: Extreme Fear (Dark Red)
+  - 🟠 **25-45**: Fear (Orange)
+  - 🟡 **45-55**: Neutral (Yellow)
+  - 🟢 **55-75**: Greed (Light Green)
+  - 💚 **75-100**: Extreme Greed (Green)
+
+### Chart Parameters
+
+| Parameter | Type | Range | Default | Description |
+|-----------|------|-------|---------|-------------|
+| `days` | Integer | 1-365 | 10 | Number of historical days to display |
+| `provider` | Choice | Stock Market / Cryptocurrency | Stock Market | Data source for chart |
+
 
 ## Discord Bot Setup
 
