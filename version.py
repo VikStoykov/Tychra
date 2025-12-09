@@ -1,4 +1,4 @@
-__version__ = "1.1.0"
+__version__ = "1.2.0"
 __release_date__ = "2025-11-23"
 __author__ = "VikStoykov"
 __license__ = "MIT"
